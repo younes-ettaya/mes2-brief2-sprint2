@@ -161,41 +161,37 @@ function supprimerProduit(id) {
 }
 
 function appliquerCriteres() {
+  // TODO : combiner la recherche et le statut, puis appliquer triPrix.value.
+  const inputserche = champRecherche.value.toLowerCase().trim();
 
-  // Combiner la recherche et le statut.
-  const recherche = champRecherche.value.trim().toLowerCase();
-  const statut = filtreStatut.value;
+  let produits = produits.filter(produit =>
+    produit.nom.toLowerCase().includes(inputserche)
+  )
+  // Trier numériquement les résultats sur une copie, sans modifier produits.
+  // Modes : initial, croissant et decroissant.
+  
+  for (let i = 0; i < produits.length; i++) {
+    for (let j = 0; j < produits.length; j++) {
+      if (produits[j] > produits[j + 1]) {
+        let temp = produits[j];
+        produits[j] = produits[j + 1];
+        produits[j + 1] = temp;
+      }
+    }
 
-  const resultats = produits.filter((produit) => {
-    const nomCorrespond = produit.nom.toLowerCase().includes(recherche);
-    const statutCorrespond = statut === "tous" || produit.statut === statut;
-    return nomCorrespond && statutCorrespond;
-  });
+  }
 
-  // Trier numériquement la copie créée par filter(), selon triPrix.value.
-  // Mode initial : garder l'ordre actuel des résultats.
-  const ordre = triPrix.value;
-  if (ordre === "initial") return resultats;
-
-  // Modes croissant et decroissant : comparer deux prix voisins.
-  for (let i = 0; i < resultats.length - 1; i++) {
-    for (let j = 0; j < resultats.length - 1 - i; j++) {
-      const gauche = resultats[j];
-      const droite = resultats[j + 1];
-
-      if (
-        (ordre === "croissant" && gauche.prix > droite.prix) ||
-        (ordre === "decroissant" && gauche.prix < droite.prix)
-      ) {
-        resultats[j] = droite;
-        resultats[j + 1] = gauche;
+   for (let i = 0; i < produits.length; i++) {
+    for (let j = 0; j < produits.length; j++) {
+      if (produits[j] < produits[j + 1]) {
+        let temp = produits[j];
+        produits[j] = produits[j + 1];
+        produits[j + 1] = temp;
       }
     }
   }
-
   // Retourner les résultats sans modifier le tableau complet produits.
- 
-
+  // Le retour ci-dessous affiche provisoirement toute la liste.
   return produits;
 }
 
@@ -203,6 +199,7 @@ function reinitialiserCriteres() {
   // TODO : vider la recherche, sélectionner tous les produits et l'ordre initial.
   // Actualiser l'affichage, sans modifier les produits ni leur sauvegarde.
 }
+
 function sauvegarderProduits() {
   // TODO : sauvegarder le tableau complet produits dans localStorage.
   // Cette fonction est déjà appelée après un ajout.
