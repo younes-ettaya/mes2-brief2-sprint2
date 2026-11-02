@@ -22,6 +22,8 @@ const triPrix = document.getElementById("tri-prix");
 const listeProduits = document.getElementById("liste-produits");
 const message = document.getElementById("message");
 
+
+
 function afficherProduits(liste) {
   listeProduits.replaceChildren();
   document.getElementById("etat-vide").hidden = liste.length > 0;
@@ -119,23 +121,81 @@ function ajouterProduit(event) {
 
 // FONCTIONS À COMPLÉTER — aucune solution n'est fournie ci-dessous.
 
+
 function modifierStatut(id) {
   // TODO : changer uniquement le statut du bon produit dans les deux sens.
-  // Le nom, le prix et l'id ne changent pas.
+  const produit = produits.find((produit) => produit.id === id);
+
+
+  if (!produit) return;
+
+  produit.statut = produit.statut === "Acheté" ? "À acheter" : "Acheté";
+
+  
+    // Le nom, le prix et l'id ne changent pas.
   // Mettre à jour la sauvegarde et l'affichage selon les critères actifs.
+
+
+  sauvegarderProduits();
+  actualiserAffichage();
 }
+
+
+
+
 
 function supprimerProduit(id) {
   // TODO : demander confirmation et retirer uniquement le bon produit.
+  const delet = confirm("confirmer la modification")
   // Mettre à jour la sauvegarde et l'affichage si la suppression est confirmée.
+  if (delet) {
+    produits = produits.filter(produit => produit.id !== id)
+    afficherProduits(produits);
+  }
+  if (!delet) {
+    return;
+  }
+  if (produits.length === 0) {
+    prochainId = 1;
+  }
 }
 
 function appliquerCriteres() {
-  // TODO : combiner la recherche et le statut, puis appliquer triPrix.value.
-  // Trier numériquement les résultats sur une copie, sans modifier produits.
-  // Modes : initial, croissant et decroissant.
+
+  // Combiner la recherche et le statut.
+  const recherche = champRecherche.value.trim().toLowerCase();
+  const statut = filtreStatut.value;
+
+  const resultats = produits.filter((produit) => {
+    const nomCorrespond = produit.nom.toLowerCase().includes(recherche);
+    const statutCorrespond = statut === "tous" || produit.statut === statut;
+    return nomCorrespond && statutCorrespond;
+  });
+
+  // Trier numériquement la copie créée par filter(), selon triPrix.value.
+  // Mode initial : garder l'ordre actuel des résultats.
+  const ordre = triPrix.value;
+  if (ordre === "initial") return resultats;
+
+  // Modes croissant et decroissant : comparer deux prix voisins.
+  for (let i = 0; i < resultats.length - 1; i++) {
+    for (let j = 0; j < resultats.length - 1 - i; j++) {
+      const gauche = resultats[j];
+      const droite = resultats[j + 1];
+
+      if (
+        (ordre === "croissant" && gauche.prix > droite.prix) ||
+        (ordre === "decroissant" && gauche.prix < droite.prix)
+      ) {
+        resultats[j] = droite;
+        resultats[j + 1] = gauche;
+      }
+    }
+  }
+
   // Retourner les résultats sans modifier le tableau complet produits.
-  // Le retour ci-dessous affiche provisoirement toute la liste.
+ 
+
   return produits;
 }
 
@@ -143,7 +203,6 @@ function reinitialiserCriteres() {
   // TODO : vider la recherche, sélectionner tous les produits et l'ordre initial.
   // Actualiser l'affichage, sans modifier les produits ni leur sauvegarde.
 }
-
 function sauvegarderProduits() {
   // TODO : sauvegarder le tableau complet produits dans localStorage.
   // Cette fonction est déjà appelée après un ajout.
